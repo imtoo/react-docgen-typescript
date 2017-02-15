@@ -121,10 +121,10 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
     function getType(prop: ts.PropertySignature): { type: string, values?: string[]}  {
         const typeAtLocation = checker.getTypeAtLocation(prop.type);
         if (typeAtLocation) {
-            const declaredType = checker.getTypeAtLocation(prop.type).intrinsicName;
+            const declaredType = typeAtLocation.intrinsicName;
             if (declaredType) return { type: declaredType };
 
-            const multipleTypes = checker.getTypeAtLocation(prop.type).types;
+            const multipleTypes = typeAtLocation.types;
             if (multipleTypes) return { type: 'enum', values: multipleTypes.map(n => `"${n.text.toString()}"`) };
         }
 
