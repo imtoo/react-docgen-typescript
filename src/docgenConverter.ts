@@ -2,15 +2,13 @@ import { FileDoc } from './parser';
 
 function normalizeProps(props: any): {} {
   return props.reduce((acc, i) => {
+    const typeValues: PropItemType = i.values ? { name: i.type, value: i.values } : { name: i.type }
     const item: PropItem = {
       description: i.comment,
-      type: { name: i.type },
+      type: typeValues,
       defaultValue: null,
       required: i.isRequired
     };
-    if (i.values) {
-      item.description = item.description + ' (one of the following:' + i.values.join(',') + ')';
-    }
 
     acc[i.name] = item;
     return acc;

@@ -42,4 +42,12 @@ describe('getDocumentation (parser) ', () => {
         const result = getDocumentation(fileName);
         assert.equal('React', result.classes[0].extends);
     });
+
+    it('Should prase component with OneOf prop', () => {
+        const fileName = path.join(__dirname, '../../src/__tests__/data/OneOfComponent.tsx'); // it's running in ./temp
+        const result = getDocumentation(fileName);
+        const i = result.interfaces[0];
+        assert.equal('union', i.members[1].type);
+        assert.equal(3, i.members[1].values.length);
+    });
 });

@@ -1,9 +1,14 @@
+import * as Radium from 'radium';
 import * as React from 'react';
-import StyledComponent from './StyledComponent';
+import { Component } from 'react';
 
-export default class Column extends StyledComponent<any, {}> {
-
-    render() {
-        return <div>Test</div>;
-    }
+@Radium
+export default class Container extends Component<{}, {}> {
+  render() {
+    return (
+      <div>
+        <div>Test</div>
+      </div>
+    );
+  }
 }
