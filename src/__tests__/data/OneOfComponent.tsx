@@ -3,7 +3,7 @@ import { Component } from 'react';
 
 export interface OneOfComponentProps {
     name: string;
-    oneOfProp: 'option1' | 'option2' | 'option3';
+    oneOfProp: "option1" | "option2" | "option3";
 }
 
 export class OneOfComponent extends Component<OneOfComponentProps, {}> {

@@ -2,7 +2,9 @@ import { FileDoc } from './parser';
 
 function normalizeProps(props: any): {} {
   return props.reduce((acc, i) => {
-    const typeValues: PropItemType = i.values ? { name: i.type, value: i.values } : { name: i.type }
+    const typeValues: PropItemType = i.values
+      ? { name: i.type, value: i.values.map(value => ({ name: value, value })) }
+      : { name: i.type }
     const item: PropItem = {
       description: i.comment,
       type: typeValues,

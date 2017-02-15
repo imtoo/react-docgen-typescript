@@ -22,5 +22,6 @@ describe('converter to react-docgen syntax', () => {
         const result = convertToDocgen(getDocumentation(fileName));
         assert.equal('enum', result.props['oneOfProp'].type.name)
         assert.equal(3, result.props['oneOfProp'].type.value.length)
+        assert.equal('"option1"', result.props['oneOfProp'].type.value[0].value)
     });
 });
