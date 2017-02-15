@@ -50,4 +50,16 @@ describe('getDocumentation (parser) ', () => {
         assert.equal('enum', i.members[1].type);
         assert.equal(3, i.members[1].values.length);
     });
+
+    it('Should prase component with custom type prop', () => {
+        const fileName = path.join(__dirname, '../../src/__tests__/data/GenericTypes.tsx'); // it's running in ./temp
+        const result = getDocumentation(fileName);
+        const i = result.interfaces[0];
+        assert.equal('age', i.members[0].name);
+        assert.equal('number', i.members[0].type);
+        assert.equal('firstName', i.members[1].name);
+        assert.equal('string', i.members[1].type);
+        assert.equal('gender', i.members[2].name);
+        assert.deepEqual(['"male"', '"female"'], i.members[2].values);
+    });
 });

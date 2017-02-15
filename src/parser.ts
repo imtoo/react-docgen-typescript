@@ -117,18 +117,27 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
         classes,
         interfaces,
     }
-}
 
-function getType(prop: ts.PropertySignature): { type: string, values?: string[]}  {
-    const unionType = prop.type as ts.UnionTypeNode;
-    if (unionType && unionType.types) {
-        return {
-            type: 'enum',
-            values: unionType.types.map(i => i.getText()),
+    function getType(prop: ts.PropertySignature): { type: string, values?: string[]}  {
+        const typeAtLocation = checker.getTypeAtLocation(prop.type);
+        if (typeAtLocation) {
+            const declaredType = checker.getTypeAtLocation(prop.type).intrinsicName;
+            if (declaredType) return { type: declaredType };
+
+            const multipleTypes = checker.getTypeAtLocation(prop.type).types;
+            if (multipleTypes) return { type: 'enum', values: multipleTypes.map(n => `"${n.text.toString()}"`) };
         }
-    }
-    return {
-        type: prop.type.getText(),
+
+        const unionType = prop.type as ts.UnionTypeNode;
+        if (unionType && unionType.types) {
+            return {
+                type: 'enum',
+                values: unionType.types.map(i => i.getText()),
+            }
+        }
+        return {
+            type: prop.type.getText(),
+        }
     }
 }
 // /** Serialize a symbol into a json object */
