@@ -47,7 +47,7 @@ describe('getDocumentation (parser) ', () => {
         const fileName = path.join(__dirname, '../../src/__tests__/data/OneOfComponent.tsx'); // it's running in ./temp
         const result = getDocumentation(fileName);
         const i = result.interfaces[0];
-        assert.equal('union', i.members[1].type);
+        assert.equal('enum', i.members[1].type);
         assert.equal(3, i.members[1].values.length);
     });
 });

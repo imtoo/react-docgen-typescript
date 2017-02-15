@@ -123,7 +123,7 @@ function getType(prop: ts.PropertySignature): { type: string, values?: string[]}
     const unionType = prop.type as ts.UnionTypeNode;
     if (unionType && unionType.types) {
         return {
-            type: 'union',
+            type: 'enum',
             values: unionType.types.map(i => i.getText()),
         }
     }

@@ -20,7 +20,7 @@ describe('converter to react-docgen syntax', () => {
     it('Should convert component with OneOf prop', () => {
         const fileName = path.join(__dirname, '../../src/__tests__/data/OneOfComponent.tsx'); // it's running in ./temp
         const result = convertToDocgen(getDocumentation(fileName));
-        assert.equal('union', result.props['oneOfProp'].type.name)
+        assert.equal('enum', result.props['oneOfProp'].type.name)
         assert.equal(3, result.props['oneOfProp'].type.value.length)
     });
 });
