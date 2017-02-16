@@ -83,13 +83,14 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
                 const members = type.getProperties().map(i => {
                     const symbol = checker.getSymbolAtLocation(i.valueDeclaration.name);
                     const prop = i.valueDeclaration as ts.PropertySignature;
-                    const typeInfo = getType(prop);
+                    const typeInfo = getType(prop, i.getName());
+
                     return {
                         name: i.getName(),
                         text: i.valueDeclaration.getText(),
                         type: typeInfo.type,
                         values: typeInfo.values,
-                        isRequired: prop.questionToken === null,
+                        isRequired: !prop.questionToken,
                         comment: ts.displayPartsToString(symbol.getDocumentationComment()).trim(),
                     };
                 });
@@ -118,7 +119,7 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
         interfaces,
     }
 
-    function getType(prop: ts.PropertySignature): { type: string, values?: string[]}  {
+    function getType(prop: ts.PropertySignature, name: string): { type: string, values?: string[]}  {
         if (!prop.type) {
             return { type: 'null' };
         }
@@ -128,7 +129,14 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
             if (declaredType) return { type: declaredType };
 
             const multipleTypes = typeAtLocation.types;
-            if (multipleTypes) return { type: 'enum', values: multipleTypes.map(n => n.text.toString()) };
+            if (multipleTypes) {
+                const firstType = multipleTypes.reduce((acc, n) => (acc || n.intrinsicName), null);
+                if (firstType) {
+                    return { type: firstType };
+                }
+
+                return { type: 'enum', values: multipleTypes.map(n => `${n.intrinsicName || n.text}`) };
+            }
         }
 
         const unionType = prop.type as ts.UnionTypeNode;

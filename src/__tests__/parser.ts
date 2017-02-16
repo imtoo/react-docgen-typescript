@@ -1,7 +1,11 @@
 import * as path from 'path';
 import 'mocha';
 import { assert } from 'chai';
-import { getDocumentation } from '../parser';
+import { MemberDoc, getDocumentation } from '../parser';
+
+const find = (members: MemberDoc[], name: string): MemberDoc | null => {
+    return members.reduce((acc, member) => (member.name === name ? member : acc), null)
+}
 
 describe('getDocumentation (parser) ', () => {
     it('Should parse component with interface', () => {
@@ -47,9 +51,16 @@ describe('getDocumentation (parser) ', () => {
         const fileName = path.join(__dirname, '../../src/__tests__/data/OneOfComponent.tsx'); // it's running in ./temp
         const result = getDocumentation(fileName);
         const i = result.interfaces[0];
-        console.log(i.members)
-        assert.equal('enum', i.members[2].type);
-        assert.equal(3, i.members[2].values.length);
+        const oneOfProp = find(i.members, 'oneOfProp');
+        assert.equal('string', find(i.members, 'name').type, 'name should be string');
+        assert.equal('any', find(i.members, 'remover').type, 'remover should be any -> because null used');
+        assert.equal('string', find(i.members, 'additional').type, 'removadditionaler should be string -> choosing first');
+        assert.equal('string', find(i.members, 'removerNotRequired').type, 'removerNotRequired should be string -> because ?');
+        assert.equal('void', find(i.members, 'voidProp').type, 'voidProps should be void');
+        assert.equal('unknown', find(i.members, 'undefinedProp').type, 'undefinedProp should be unknown');
+        assert.equal('unknown', find(i.members, 'nullProp').type, 'nullProp should be unknown');
+        assert.equal('enum', oneOfProp.type);
+        assert.equal(3, oneOfProp.values.length);
     });
 
     it('Should parse component with custom type prop', () => {
@@ -57,10 +68,10 @@ describe('getDocumentation (parser) ', () => {
         const result = getDocumentation(fileName);
         const i = result.interfaces[0];
         assert.equal('age', i.members[0].name);
-        assert.equal('number', i.members[0].type);
+        assert.equal('number', find(i.members, 'age').type);
         assert.equal('firstName', i.members[1].name);
-        assert.equal('string', i.members[1].type);
+        assert.equal('string', find(i.members, 'firstName').type);
         assert.equal('gender', i.members[2].name);
-        assert.deepEqual(['male', 'female'], i.members[2].values);
+        assert.deepEqual(['male', 'female'], find(i.members, 'gender').values);
     });
 });
