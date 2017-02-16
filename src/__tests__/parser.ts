@@ -43,15 +43,16 @@ describe('getDocumentation (parser) ', () => {
         assert.equal('React', result.classes[0].extends);
     });
 
-    it('Should prase component with OneOf prop', () => {
+    it('Should parse component with OneOf prop', () => {
         const fileName = path.join(__dirname, '../../src/__tests__/data/OneOfComponent.tsx'); // it's running in ./temp
         const result = getDocumentation(fileName);
         const i = result.interfaces[0];
-        assert.equal('enum', i.members[1].type);
-        assert.equal(3, i.members[1].values.length);
+        console.log(i.members)
+        assert.equal('enum', i.members[2].type);
+        assert.equal(3, i.members[2].values.length);
     });
 
-    it('Should prase component with custom type prop', () => {
+    it('Should parse component with custom type prop', () => {
         const fileName = path.join(__dirname, '../../src/__tests__/data/GenericTypes.tsx'); // it's running in ./temp
         const result = getDocumentation(fileName);
         const i = result.interfaces[0];
@@ -60,6 +61,6 @@ describe('getDocumentation (parser) ', () => {
         assert.equal('firstName', i.members[1].name);
         assert.equal('string', i.members[1].type);
         assert.equal('gender', i.members[2].name);
-        assert.deepEqual(['"male"', '"female"'], i.members[2].values);
+        assert.deepEqual(['male', 'female'], i.members[2].values);
     });
 });

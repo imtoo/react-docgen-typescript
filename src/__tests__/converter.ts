@@ -21,7 +21,9 @@ describe('converter to react-docgen syntax', () => {
         const fileName = path.join(__dirname, '../../src/__tests__/data/OneOfComponent.tsx'); // it's running in ./temp
         const result = convertToDocgen(getDocumentation(fileName));
         assert.equal('enum', result.props['oneOfProp'].type.name)
+        assert.equal('unknown', result.props['nullProp'].type.name)
+        assert.equal('unknown', result.props['undefinedProp'].type.name)
         assert.equal(3, result.props['oneOfProp'].type.value.length)
-        assert.equal('"option1"', result.props['oneOfProp'].type.value[0].value)
+        assert.equal('option1', result.props['oneOfProp'].type.value[0].value)
     });
 });
