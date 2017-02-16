@@ -24,7 +24,7 @@ describe('converter to react-docgen syntax', () => {
         assert.equal('string', result.props['additional'].type.name, 'additional.type !== string')
         assert.equal('any', result.props['remover'].type.name, 'remover.type !== any')
         assert.equal('string', result.props['removerNotRequired'].type.name, 'removerNotRequired.type !== string')
-        assert.equal('void', result.props['voidProp'].type.name, 'voidProp.type !== void')
+        assert.equal('func', result.props['voidProp'].type.name, 'voidProp.type !== func')
         assert.equal('enum', result.props['oneOfProp'].type.name, 'oneOfProp.type !== enum')
         assert.equal('unknown', result.props['nullProp'].type.name, 'nullProp type !== unknown')
         assert.equal('unknown', result.props['undefinedProp'].type.name, 'undefinedProp type !== unknown')

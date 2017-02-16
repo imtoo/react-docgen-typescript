@@ -4,7 +4,7 @@ function normalizeProps(props: any): {} {
   return props.reduce((acc, i) => {
     const typeValues: PropItemType = i.values
       ? { name: i.type, value: i.values.map(value => ({ name: value, value })) }
-      : { name: i.type }
+      : { name: convertType(i.type) }
     const item: PropItem = {
       description: i.comment,
       type: typeValues,
@@ -15,6 +15,14 @@ function normalizeProps(props: any): {} {
     acc[i.name] = item;
     return acc;
   }, {})
+}
+
+function convertType(type: string) {
+  switch (type) {
+    case 'void': return 'func';
+    case '() => void': return 'func';
+  }
+  return type;
 }
 
 export function convertToDocgen(doc: FileDoc) {
