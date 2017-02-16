@@ -17,6 +17,22 @@ function normalizeProps(props: any): {} {
   }, {})
 }
 
+// Bluekit knows:
+// any
+//   node
+//   Children
+//   ReactNode
+//   ReactElement
+//   string
+//   bool
+//   boolean
+//   number
+//   array
+//   object
+//   func
+//   enum
+//   shape
+
 function convertType(type: string) {
   switch (type) {
     case 'void': return 'func';
