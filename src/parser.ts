@@ -25,14 +25,20 @@ export interface MemberDoc {
     name: string;
     text: string;
     type: string;
+    array?: boolean;
     values?: string[];
     isRequired: boolean;
     comment: string;
 }
 
+export interface DefaultProps {
+    [key: string]: string;
+}
+
 export interface FileDoc {
     classes: ClassDoc[];
     interfaces: InterfaceDoc[];
+    defaultProps: DefaultProps;
 }
 /** Generate documention for all classes in a set of .ts files */
 export function getDocumentation(fileName: string, options: ts.CompilerOptions = defaultOptions): FileDoc {
@@ -42,6 +48,7 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
 
     const classes: ClassDoc[] = [];
     const interfaces: InterfaceDoc[] = [];
+    const defaultProps: DefaultProps = {};
 
     const sourceFile = program.getSourceFile(fileName);
     ts.forEachChild(sourceFile, visit);
@@ -52,6 +59,7 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
         if (!isNodeExported(node)) {
             return;
         }
+
 
         if (node.kind === ts.SyntaxKind.ClassDeclaration) {
             const classNode = node as ts.ClassDeclaration;
@@ -65,6 +73,18 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
                 .filter(i => i.kind === ts.SyntaxKind.Identifier)
                 .map((i: ts.Identifier) => i.text);
 
+            getFlatChildren(node).map(x => {
+                if (x.kind === ts.SyntaxKind.StaticKeyword) {
+                    const defaultPropsNode = x.parent;
+                    if (defaultPropsNode.name.text === 'defaultProps') {
+                        const members = checker.getTypeAtLocation(defaultPropsNode).members;
+                        Object.keys(members).map(name => {
+                            defaultProps[name] = members[name].valueDeclaration.getText().split(':').slice(1).join(':').trim();
+                        })
+                    }
+                }
+            })
+
             classes.push({
                 name: symbol.name,
                 comment: ts.displayPartsToString(symbol.getDocumentationComment()),
@@ -72,7 +92,6 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
                 propInterface: list.length > 1 ? list[1] : null,
             });
         }
-
         if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
             const interfaceDeclaration = node as ts.InterfaceDeclaration;
              if (interfaceDeclaration.parent === sourceFile) {
@@ -84,10 +103,15 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
                     const symbol = checker.getSymbolAtLocation(i.valueDeclaration.name);
                     const prop = i.valueDeclaration as ts.PropertySignature;
                     const typeInfo = getType(prop, i.getName());
+                    const name = i.getName();
+
+                    const typeAtLocation: any = prop.type ? checker.getTypeAtLocation(prop.type) : {};
 
                     return {
-                        name: i.getName(),
+                        name: name,
+                        default: null,
                         text: i.valueDeclaration.getText(),
+                        array: typeAtLocation.target && typeAtLocation.symbol.name === 'Array',
                         type: typeInfo.type,
                         values: typeInfo.values,
                         isRequired: !prop.questionToken,
@@ -117,13 +141,21 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
     return {
         classes,
         interfaces,
+        defaultProps
     }
 
-    function getType(prop: ts.PropertySignature, name: string): { type: string, values?: string[]}  {
+    function getType(prop: ts.PropertySignature, name: string): { array?: boolean; type: string, values?: string[]}  {
         if (!prop.type) {
             return { type: 'null' };
         }
         const typeAtLocation: any = checker.getTypeAtLocation(prop.type);
+
+        const array = (typeAtLocation.target && typeAtLocation.symbol.name === 'Array');
+
+        // if(name === 'fields') {
+        //     console.log(typeAtLocation.symbol)
+        // }
+
         if (typeAtLocation) {
             const declaredType = typeAtLocation.intrinsicName;
             if (declaredType) return { type: declaredType };
@@ -132,7 +164,7 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
             if (multipleTypes) {
                 const firstType = multipleTypes.reduce((acc, n) => (acc || n.intrinsicName), null);
                 if (firstType) {
-                    return { type: firstType };
+                    return { array, type: firstType };
                 }
 
                 return { type: 'enum', values: multipleTypes.map(n => `${n.intrinsicName || n.text}`) };
@@ -147,6 +179,7 @@ export function getDocumentation(fileName: string, options: ts.CompilerOptions =
             }
         }
         return {
+            array,
             type: prop.type.getText(),
         }
     }

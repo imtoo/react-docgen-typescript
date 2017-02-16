@@ -3,6 +3,7 @@ import 'mocha';
 import { assert } from 'chai';
 import { convertToDocgen } from '../docgenConverter';
 import { getDocumentation } from '../parser';
+import multifieldData from './MultifieldShape';
 
 describe('converter to react-docgen syntax', () => {
     it('Should convert component with interface', () => {
@@ -39,6 +40,12 @@ describe('converter to react-docgen syntax', () => {
         assert.equal(true, result.props['voidProp'].required, 'voidProp should be required')
         assert.equal(true, result.props['undefinedProp'].required, 'undefinedProp should be required')
         assert.equal(true, result.props['oneOfProp'].required, 'oneOfProp should be required')
+    });
+
+    it('Should convert component with nested interface', () => {
+        const fileName = path.join(__dirname, '../../src/__tests__/data/Multifield.tsx'); // it's running in ./temp
+        const result = convertToDocgen(getDocumentation(fileName));
+        assert.deepEqual(result.props, multifieldData)
     });
 });
 

@@ -1,16 +1,28 @@
-import { FileDoc } from './parser';
+import { FileDoc, DefaultProps } from './parser';
 
-function normalizeProps(props: any): {} {
+function getDefaultValue(value) {
+  return value ? { defaultValue: { computed: false, value }} : {};
+}
+
+function fixTypeWithArray(item) {
+  if (item.array)
+    return { name: 'arrayOf', value: { name: convertType(item.type).replace('[]', '') } }
+  return { name: convertType(item.type) }
+}
+
+function normalizeProps(props: any, defaultProps: DefaultProps): {} {
   return props.reduce((acc, i) => {
     const typeValues: PropItemType = i.values
       ? { name: i.type, value: i.values.map(value => ({ name: value, value })) }
-      : { name: convertType(i.type) }
+      : fixTypeWithArray(i)
+
     const item: PropItem = {
+      ...getDefaultValue(defaultProps[i.name]),
       description: i.comment,
       type: typeValues,
-      defaultValue: null,
       required: i.isRequired
     };
+
 
     acc[i.name] = item;
     return acc;
@@ -37,6 +49,7 @@ function convertType(type: string) {
   switch (type) {
     case 'void': return 'func';
     case '() => void': return 'func';
+    case 'Object': return 'object';
   }
   return type;
 }
@@ -44,24 +57,27 @@ function convertType(type: string) {
 export function convertToDocgen(doc: FileDoc) {
   const classComment = doc.classes[0].comment;
   const docInterface = doc.interfaces[0]
-  const props = docInterface ? normalizeProps(docInterface.members) : {};
+  const props = docInterface ? normalizeProps(docInterface.members, doc.defaultProps) : {};
 
   return {
     description: classComment,
-    props: props
+    props: props,
   }
 }
 
 export interface PropItemType {
   name: string;
   value?: any;
+  defaultValue?: {
+    computed: boolean;
+    value: string;
+  }
 }
 
 export interface PropItem {
   required: boolean;
   type: PropItemType;
   description: string;
-  defaultValue: any;
 }
 
 export interface PropsObject {
